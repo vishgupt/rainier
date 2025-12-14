@@ -11,6 +11,15 @@ service DatabaseService {
   rpc GetDatabase(GetDatabaseRequest) returns (GetDatabaseResponse);
 }
 
+// Collection service for read-only operations
+service CollectionService {
+  // List all collections in a database
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse);
+  
+  // Get collection information
+  rpc GetCollection(GetCollectionRequest) returns (GetCollectionResponse);
+}
+
 // Request to list all databases
 message ListDatabasesRequest {
   // Optional pagination
@@ -41,4 +50,39 @@ message Database {
   int64 created_at = 3;
   int64 updated_at = 4;
   map<string, string> metadata = 5;
+}
+
+// Request to list collections in a database
+message ListCollectionsRequest {
+  string database_name = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+// Response containing list of collections
+message ListCollectionsResponse {
+  repeated Collection collections = 1;
+  int32 total = 2;
+}
+
+// Request to get specific collection
+message GetCollectionRequest {
+  string database_name = 1;
+  string collection_name = 2;
+}
+
+// Response with collection details
+message GetCollectionResponse {
+  Collection collection = 1;
+}
+
+// Collection information
+message Collection {
+  string name = 1;
+  string database_name = 2;
+  string description = 3;
+  int32 vector_dimension = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  map<string, string> metadata = 7;
 }

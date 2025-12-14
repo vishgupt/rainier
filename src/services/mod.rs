@@ -1,1 +1,2 @@
-pub mod grpc_service;
+pub mod database_service;
+pub mod collection_service;

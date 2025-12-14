@@ -1,6 +1,6 @@
 use crate::models::database::Database;
 use std::collections::HashMap;
-use super::manager::DatabaseManager;
+use super::database_manager::DatabaseManager;
 
 #[derive(Debug)]
 pub struct InMemoryDatabaseManager {
