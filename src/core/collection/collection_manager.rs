@@ -1,4 +1,4 @@
-use crate::models::collection::Collection;
+use crate::proto::vectordb::Collection;
 
 /// Defines the core collection management operations.
 /// Implement this trait for different collection backends.
@@ -11,4 +11,7 @@ pub trait CollectionManager: Send + Sync + 'static {
     
     /// Retrieves a specific collection by name.
     fn get_collection(&self, database_name: &str, collection_name: &str) -> Option<&Collection>;
+    
+    /// Adds a new collection to a database.
+    fn add_collection(&mut self, collection: Collection) -> Result<(), String>;
 }

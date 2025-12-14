@@ -4,7 +4,6 @@ use crate::proto::vectordb::{
     collection_service_server::{CollectionService, CollectionServiceServer},
     ListCollectionsRequest, ListCollectionsResponse,
     GetCollectionRequest, GetCollectionResponse,
-    Collection,
 };
 
 #[derive(Debug)]
@@ -33,18 +32,7 @@ impl CollectionService for VectorCollectionService {
         let req = request.into_inner();
         let collections = self.collection_manager.list_collections(&req.database_name);
         
-        let proto_collections: Vec<Collection> = collections
-            .into_iter()
-            .map(|col| Collection {
-                name: col.name,
-                database_name: col.database_name,
-                description: col.description,
-                vector_dimension: col.vector_dimension,
-                created_at: col.created_at,
-                updated_at: col.updated_at,
-                metadata: col.metadata,
-            })
-            .collect();
+        let proto_collections = collections;
         
         let total = proto_collections.len() as i32;
         let response = ListCollectionsResponse {
@@ -63,18 +51,8 @@ impl CollectionService for VectorCollectionService {
         
         match self.collection_manager.get_collection(&req.database_name, &req.collection_name) {
             Some(col) => {
-                let proto_col = Collection {
-                    name: col.name.clone(),
-                    database_name: col.database_name.clone(),
-                    description: col.description.clone(),
-                    vector_dimension: col.vector_dimension,
-                    created_at: col.created_at,
-                    updated_at: col.updated_at,
-                    metadata: col.metadata.clone(),
-                };
-                
                 let response = GetCollectionResponse {
-                    collection: Some(proto_col),
+                    collection: Some(col.clone()),
                 };
                 
                 Ok(Response::new(response))

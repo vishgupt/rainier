@@ -4,7 +4,6 @@ use crate::proto::vectordb::{
     database_service_server::{DatabaseService, DatabaseServiceServer},
     ListDatabasesRequest, ListDatabasesResponse,
     GetDatabaseRequest, GetDatabaseResponse,
-    Database,
 };
 
 #[derive(Debug)]
@@ -32,16 +31,7 @@ impl DatabaseService for VectorDatabaseService {
     ) -> Result<Response<ListDatabasesResponse>, Status> {
         let databases = self.db_manager.list_databases();
         
-        let proto_databases: Vec<Database> = databases
-            .into_iter()
-            .map(|db| Database {
-                name: db.name,
-                description: db.description,
-                created_at: db.created_at,
-                updated_at: db.updated_at,
-                metadata: db.metadata,
-            })
-            .collect();
+        let proto_databases = databases;
         
         let total = proto_databases.len() as i32;
         let response = ListDatabasesResponse {
@@ -60,16 +50,8 @@ impl DatabaseService for VectorDatabaseService {
         
         match self.db_manager.get_database(&req.database_name) {
             Some(db) => {
-                let proto_db = Database {
-                    name: db.name.clone(),
-                    description: db.description.clone(),
-                    created_at: db.created_at,
-                    updated_at: db.updated_at,
-                    metadata: db.metadata.clone(),
-                };
-                
                 let response = GetDatabaseResponse {
-                    database: Some(proto_db),
+                    database: Some(db.clone()),
                 };
                 
                 Ok(Response::new(response))

@@ -6,6 +6,7 @@ mod storage;
 
 use crate::proto::vectordb::database_service_server::DatabaseServiceServer;
 use crate::proto::vectordb::collection_service_server::CollectionServiceServer;
+use crate::proto::vectordb::point_service_server::PointServiceServer;
 use tonic::transport::Server;
 
 pub mod proto {
@@ -23,6 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Server::builder()
         .add_service(DatabaseServiceServer::new(services::database_service::VectorDatabaseService::new()))
         .add_service(CollectionServiceServer::new(services::collection_service::VectorCollectionService::new()))
+        .add_service(PointServiceServer::new(services::point_service::VectorPointService::new()))
         .serve(addr)
         .await?;
     
