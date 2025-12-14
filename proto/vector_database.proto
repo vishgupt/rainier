@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package vectordb;
+
+// Database service for read-only operations
+service DatabaseService {
+  // List all databases
+  rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse);
+  
+  // Get database information
+  rpc GetDatabase(GetDatabaseRequest) returns (GetDatabaseResponse);
+}
+
+// Request to list all databases
+message ListDatabasesRequest {
+  // Optional pagination
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+// Response containing list of databases
+message ListDatabasesResponse {
+  repeated Database databases = 1;
+  int32 total = 2;
+}
+
+// Request to get specific database
+message GetDatabaseRequest {
+  string database_name = 1;
+}
+
+// Response with database details
+message GetDatabaseResponse {
+  Database database = 1;
+}
+
+// Database information
+message Database {
+  string name = 1;
+  string description = 2;
+  int64 created_at = 3;
+  int64 updated_at = 4;
+  map<string, string> metadata = 5;
+}
