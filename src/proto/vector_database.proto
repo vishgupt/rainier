@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "github.com/vishgupt/rainier/src/internal/pb";
+option java_multiple_files = true;
+option java_package = "com.vishgupt.rainier.pb";
+option java_outer_classname = "VectorDatabaseProto";
+
+// DistanceMetric defines the distance metric for vector search operations
+enum DistanceMetric {
+  EUCLIDEAN = 0;      // Euclidean distance (L2 norm)
+  COSINE = 1;         // Cosine similarity distance
+  DOT_PRODUCT = 2;    // Dot product distance
+  MANHATTAN = 3;      // Manhattan distance (L1 norm)
+}
+
+// ============================================================================
+// Data Models
+// ============================================================================
+
+// Database represents a vector database instance
+message Database {
+  string name = 1;                    // Unique database name
+  int64 created_at = 3;               // Creation timestamp (Unix seconds)
+}
+
+// Collection represents a collection of vectors within a database
+message Collection {
+  string name = 1;                    // Unique collection name
+  string database_name = 2;           // Parent database name
+  int32 vector_dimension = 4;         // Dimension of vectors in this collection
+  int64 created_at = 5;               // Creation timestamp (Unix seconds)
+}
+
+// Point represents a single vector point in a collection
+message Point {
+  string id = 1;                      // Unique point identifier
+  string collection_name = 2;         // Parent collection name
+  string database_name = 3;           // Parent database name
+  repeated float vector = 4;          // Vector values
+  int64 created_at = 6;               // Creation timestamp (Unix seconds)
+}
+
+// NearestPoint represents a point with its distance from a query vector
+message NearestPoint {
+  Point point = 1;                    // The point data
+  float distance = 2;                 // Distance from query vector
+}
+
+// ============================================================================
+// Database Service Messages
+// ============================================================================
+
+// ListDatabasesRequest requests a paginated list of databases
+message ListDatabasesRequest {
+  int32 page = 1;                     // Page number (0-indexed)
+  int32 limit = 2;                    // Number of results per page
+}
+
+// ListDatabasesResponse returns a paginated list of databases
+message ListDatabasesResponse {
+  repeated Database databases = 1;    // List of databases
+  int32 total = 2;                    // Total number of databases
+}
+
+// GetDatabaseRequest requests a specific database by name
+message GetDatabaseRequest {
+  string database_name = 1;           // Name of the database to retrieve
+}
+
+// GetDatabaseResponse returns a specific database
+message GetDatabaseResponse {
+  Database database = 1;              // The requested database
+}
+
+// ============================================================================
+// Collection Service Messages
+// ============================================================================
+
+// ListCollectionsRequest requests a paginated list of collections
+message ListCollectionsRequest {
+  string database_name = 1;           // Parent database name
+  int32 page = 2;                     // Page number (0-indexed)
+  int32 limit = 3;                    // Number of results per page
+}
+
+// ListCollectionsResponse returns a paginated list of collections
+message ListCollectionsResponse {
+  repeated Collection collections = 1; // List of collections
+  int32 total = 2;                    // Total number of collections
+}
+
+// GetCollectionRequest requests a specific collection by name
+message GetCollectionRequest {
+  string database_name = 1;           // Parent database name
+  string collection_name = 2;         // Name of the collection to retrieve
+}
+
+// GetCollectionResponse returns a specific collection
+message GetCollectionResponse {
+  Collection collection = 1;          // The requested collection
+}
+
+// ============================================================================
+// Point Service Messages
+// ============================================================================
+
+// GetPointRequest requests a specific point by ID
+message GetPointRequest {
+  string database_name = 1;           // Parent database name
+  string collection_name = 2;         // Parent collection name
+  string point_id = 3;                // ID of the point to retrieve
+}
+
+// GetPointResponse returns a specific point
+message GetPointResponse {
+  Point point = 1;                    // The requested point
+}
+
+// SearchNearestRequest requests nearest neighbor search
+message SearchNearestRequest {
+  string database_name = 1;           // Parent database name
+  string collection_name = 2;         // Parent collection name
+  repeated float query_vector = 3;    // Query vector for similarity search
+  int32 limit = 4;                    // Maximum number of results to return
+  DistanceMetric distance_metric = 5; // Distance metric to use for search
+}
+
+// SearchNearestResponse returns nearest neighbor search results
+message SearchNearestResponse {
+  repeated NearestPoint results = 1;  // List of nearest points with distances
+  int32 total_matches = 4;            // Total number of matching points
+  DistanceMetric distance_metric = 5; // Distance metric used in search
+  repeated float query_vector = 6;    // Echo of the query vector
+}
+
+// ============================================================================
+// gRPC Services
+// ============================================================================
+
+// DatabaseService provides operations for managing vector databases
+service DatabaseService {
+  // ListDatabases returns a paginated list of all databases
+  rpc ListDatabases(ListDatabasesRequest) returns (ListDatabasesResponse) {}
+  
+  // GetDatabase retrieves a specific database by name
+  rpc GetDatabase(GetDatabaseRequest) returns (GetDatabaseResponse) {}
+}
+
+// CollectionService provides operations for managing collections within databases
+service CollectionService {
+  // ListCollections returns a paginated list of collections in a database
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse) {}
+  
+  // GetCollection retrieves a specific collection by name
+  rpc GetCollection(GetCollectionRequest) returns (GetCollectionResponse) {}
+}
+
+// PointService provides operations for managing vector points and similarity search
+service PointService {
+  // GetPoint retrieves a specific point by ID
+  rpc GetPoint(GetPointRequest) returns (GetPointResponse) {}
+  
+  // SearchNearest performs nearest neighbor search on a collection
+  rpc SearchNearest(SearchNearestRequest) returns (SearchNearestResponse) {}
+}
